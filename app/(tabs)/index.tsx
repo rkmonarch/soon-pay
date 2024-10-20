@@ -1,70 +1,158 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import "react-native-get-random-values"; // Add this import at the top of the file
+import { useState } from "react";
+import { StyleSheet, Image } from "react-native";
+import NfcManager, { Ndef, NfcTech } from "react-native-nfc-manager";
+import { Button, Text, YStack } from "tamagui";
+import { useRouter } from "expo-router";
+import { createNewWallet } from "@/helpers/wallet";
+import CenteredDivider from "@/components/Separator";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+// Pre-step, call this before any NFC operations
+NfcManager.start();
 
-export default function HomeScreen() {
+function App() {
+  const [data, setData] = useState<string>("");
+  const router = useRouter();
+
+  async function ensureNfcEnabled() {
+    const isNfcEnabled = await NfcManager.isEnabled();
+    if (!isNfcEnabled) {
+      console.warn("NFC is not enabled on this device.");
+      return false;
+    }
+    return true;
+  }
+
+  async function readNdef() {
+    if (!(await ensureNfcEnabled())) {
+      return;
+    }
+    console.log("Scanning for NFC tags...");
+    try {
+      await NfcManager.requestTechnology(NfcTech.NfcA);
+      console.log("Technology requested");
+      const tag = await NfcManager.getTag();
+      let msg: Uint8Array | undefined;
+
+      if (tag?.ndefMessage[0]?.payload) {
+        msg = new Uint8Array(tag.ndefMessage[0].payload);
+      } else {
+        msg = undefined;
+      }
+      const text = Ndef.text.decodePayload(msg!);
+      console.log("NFC Data:", text);
+      setData("NFC Data: " + text);
+    } catch (ex) {
+      console.log("Oops!", ex);
+    } finally {
+      // stop the nfc scanning
+      NfcManager.cancelTechnologyRequest();
+    }
+  }
+
+  async function writeNdef(): Promise<boolean> {
+    console.log("Creating wallet...");
+    let result = false;
+
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+
+      const walletCode = await createNewWallet("password");
+      console.log("Wallet code:", walletCode);
+      const bytes = Ndef.encodeMessage([
+        Ndef.textRecord(JSON.stringify({ key: walletCode?.encryptedKey })),
+      ]);
+
+      if (bytes) {
+        await NfcManager.ndefHandler.writeNdefMessage(bytes);
+        result = true;
+        console.log("Wallet code written successfully");
+      }
+    } catch (ex) {
+      console.warn("Error writing wallet code:", ex);
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+    }
+
+    return result;
+  }
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+    <YStack flex={1} alignItems="center" justifyContent="center" padding="$4">
+      <Image
+        source={require("@/assets/images/magic.png")}
+        resizeMode="contain"
+        style={{ width: 350, height: 350, marginTop: 15 }}
+        alt="Magic Wallet"
+      />
+      <Text fontSize="$9" marginTop="$6" color="#000" fontWeight="semibold">
+        SOON Pay
+      </Text>
+
+      <Button
+        onPress={async () => {
+          console.log("Creating wallet...");
+          const walletCode = await createNewWallet("password");
+          console.log("Wallet code:", walletCode);
+          await readNdef();
+          // router.push("/wallet");
+        }}
+        style={styles.button}
+      >
+        Create Wallet
+      </Button>
+      <CenteredDivider text="OR" />
+      <Button
+        onPress={async () => {
+          router.push("/receive");
+        }}
+        style={styles.outlineButton}
+      >
+        Receive funds via NFC
+      </Button>
+    </YStack>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "white",
   },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
+  imageContainer: {
+    marginTop: 20,
+    marginBottom: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#3b82f6",
+    padding: 10,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
+  button: {
+    marginTop: 20,
+    backgroundColor: "#8357FF",
+    borderRadius: 32,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontWeight: "semibold",
+    color: "#fff",
+    fontSize: 18,
+    width: "80%",
+  },
+  outlineButton: {
+    marginTop: 3,
+    backgroundColor: "transparent",
+    borderRadius: 32,
+    borderColor: "#8357FF",
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontWeight: "semibold",
+    color: "#8357FF",
+    fontSize: 18,
+    width: "80%",
   },
 });
+
+export default App;
