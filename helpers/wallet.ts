@@ -8,6 +8,8 @@ import {
   LAMPORTS_PER_SOL,
 } from "@solana/web3.js";
 import * as Bip39 from "bip39";
+import Toast from "react-native-toast-message";
+import { Linking } from "react-native";
 
 // Solana network setup
 const SOLANA_RPC_URL = "https://rpc.devnet.soo.network/rpc";
@@ -29,7 +31,7 @@ const sendTransactionFromKey = async (
 
   // Define the receiver address
   const toAddress = new PublicKey(
-    "5VnRtyXfXPUF7jw5ZjNHuHgVv7KhAxgxbHgTpRzvuLr5"
+    "FVP39NNZMKfEDzbg3BWWZEiYPH3wyFp5kmtuN3M2AZFo"
   ); // Replace with your destination address
 
   // Create a transaction
@@ -64,26 +66,22 @@ const createNewWallet = async (password: string) => {
     console.log("Creating new wallet...");
 
     const mnemonic = Bip39.generateMnemonic();
-    console.log("Mnemonic phrase:");
-    console.log("Mnemonic phrase:", mnemonic);
     const seed = Bip39.mnemonicToSeedSync(mnemonic, "").slice(0, 32);
     const keypair = Keypair.fromSeed(seed);
 
     console.log("New wallet address:", keypair.publicKey.toBase58());
-    // Generate a new Solana Keypair
-    // const keypair = Keypair.generate(); // Removed await, it's not necessary for synchronous methods
 
     if (!keypair) {
       console.error("Failed to generate a keypair");
       return;
     }
 
-    console.log("New wallet address:", keypair.publicKey.toBase58());
-
     // Convert the secretKey to a JSON stringified array for encryption
     const privateKey = JSON.stringify(Array.from(keypair.secretKey));
-    console.log("Private key (un-encrypted):", privateKey);
 
+    const user = Keypair.fromSecretKey(new Uint8Array(JSON.parse(privateKey)));
+    console.log("User address:", user.publicKey.toBase58());
+    console.log("Private key (un-encrypted):", privateKey);
     // Encrypt the private key using the API
     const encryptedKey = await encryptKey(password, privateKey);
 
@@ -144,7 +142,7 @@ const decryptKey = async (password: string, encryptedData: string) => {
 const executeTransaction = async (
   encryptedKey: string,
   password: string,
-  toAddress: string = "5VnRtyXfXPUF7jw5ZjNHuHgVv7KhAxgxbHgTpRzvuLr5", // Default receiver
+  toAddress: string = "FVP39NNZMKfEDzbg3BWWZEiYPH3wyFp5kmtuN3M2AZFo", // Default receiver
   amount: number
 ) => {
   // Decrypt the private key using the API
@@ -161,6 +159,19 @@ const executeTransaction = async (
   );
 
   const signature = await connection.sendTransaction(transaction, [keypair]);
+
+  const link = `https://explorer.devnet.soo.network/tx/${signature}`;
+  Toast.show({
+    text1: "Payment Successful",
+    type: "success",
+    position: "bottom",
+    onPress() {
+      console.log("Link to transaction explorer");
+      Linking.openURL(link).catch((err) =>
+        console.error("Failed to open URL:", err)
+      );
+    },
+  });
   console.log("Transaction signature:", signature);
 
   // Wait for confirmation

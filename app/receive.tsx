@@ -2,7 +2,6 @@ import { useState } from "react";
 import { StyleSheet } from "react-native";
 import { Button, Input, Text, View, XStack, YStack } from "tamagui";
 import NfcManager, { Ndef, NfcTech } from "react-native-nfc-manager";
-import { useQuery } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 
 NfcManager.start();

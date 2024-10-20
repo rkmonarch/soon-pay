@@ -1,10 +1,9 @@
-import "react-native-get-random-values"; // Add this import at the top of the file
+import "react-native-get-random-values";
 import { useState } from "react";
 import { StyleSheet, Image } from "react-native";
 import NfcManager, { Ndef, NfcTech } from "react-native-nfc-manager";
 import { Button, Text, YStack } from "tamagui";
-import { useRouter } from "expo-router";
-import { createNewWallet } from "@/helpers/wallet";
+import { createNewWallet, executeTransaction } from "@/helpers/wallet";
 import CenteredDivider from "@/components/Separator";
 
 // Pre-step, call this before any NFC operations
@@ -12,21 +11,8 @@ NfcManager.start();
 
 function App() {
   const [data, setData] = useState<string>("");
-  const router = useRouter();
-
-  async function ensureNfcEnabled() {
-    const isNfcEnabled = await NfcManager.isEnabled();
-    if (!isNfcEnabled) {
-      console.warn("NFC is not enabled on this device.");
-      return false;
-    }
-    return true;
-  }
 
   async function readNdef() {
-    if (!(await ensureNfcEnabled())) {
-      return;
-    }
     console.log("Scanning for NFC tags...");
     try {
       await NfcManager.requestTechnology(NfcTech.NfcA);
@@ -40,8 +26,9 @@ function App() {
         msg = undefined;
       }
       const text = Ndef.text.decodePayload(msg!);
-      console.log("NFC Data:", text);
-      setData("NFC Data: " + text);
+      const parsedText = JSON.parse(text);
+      console.log("NFC Data:", parsedText.key);
+      setData(parsedText.key);
     } catch (ex) {
       console.log("Oops!", ex);
     } finally {
@@ -60,7 +47,11 @@ function App() {
       const walletCode = await createNewWallet("password");
       console.log("Wallet code:", walletCode);
       const bytes = Ndef.encodeMessage([
-        Ndef.textRecord(JSON.stringify({ key: walletCode?.encryptedKey })),
+        Ndef.textRecord(
+          JSON.stringify({
+            key: walletCode?.encryptedKey,
+          })
+        ),
       ]);
 
       if (bytes) {
@@ -94,8 +85,7 @@ function App() {
           console.log("Creating wallet...");
           const walletCode = await createNewWallet("password");
           console.log("Wallet code:", walletCode);
-          await readNdef();
-          // router.push("/wallet");
+          await writeNdef();
         }}
         style={styles.button}
       >
@@ -104,7 +94,14 @@ function App() {
       <CenteredDivider text="OR" />
       <Button
         onPress={async () => {
-          router.push("/receive");
+          await readNdef();
+          console.log("Reading NFC tag...", data);
+          executeTransaction(
+            data,
+            "password",
+            "FVP39NNZMKfEDzbg3BWWZEiYPH3wyFp5kmtuN3M2AZFo",
+            0.0001
+          );
         }}
         style={styles.outlineButton}
       >

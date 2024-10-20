@@ -1,50 +1,77 @@
-# Welcome to your Expo app 👋
+# SOON Pay - A NFC based payment wallet on SOON Network
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+SOON Pay is a NFC based payment wallet on SOON Network. It is a defi payment wallet that allows users to send and receive payments on SOON devnet.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Send and receive payments
+- Encrypted and threshold signature between mobile app and the NFC card
+- NFC card for secure transactions
 
-   ```bash
-   npm install
-   ```
+## Installation
 
-2. Start the app
-
-   ```bash
-    npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+1. Clone the repository
+2. Install the dependencies
+3. Run the application
 
 ```bash
-npm run reset-project
+git clone https://github.com/rkmonarch/soon-pay
+cd soon-pay
+npm install
+npx expo run:ios/android
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Usage
 
-## Learn more
+1. Create a new account
+2. Send and receive payments
+3. Secure transactions using NFC card
 
-To learn more about developing your project with Expo, look at the following resources:
+## Demo
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+<video width="320" height="240" controls>
+  <source src="./assets/images/SOON.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
-## Join the community
+## Contributing
 
-Join our community of developers creating universal apps.
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Please make sure to update tests as appropriate.
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
+
+````
+
+### 2. Create a new branch
+
+```bash
+git checkout -b feature/AmazingFeature
+````
+
+### 3. Commit your changes
+
+```bash
+git commit -m 'Add some AmazingFeature'
+```
+
+### 4. Push to the branch
+
+```bash
+git push origin feature/AmazingFeature
+```
+
+### 5. Open a Pull Request
+
+Go to the repository on GitHub and open a pull request.
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+## Contact
+
+Rahul Kulkarni - [@0xrahulk](https://twitter.com/0xrahulk)
