@@ -29,10 +29,8 @@ npx expo run:ios/android
 
 ## Demo
 
-<video width="320" height="240" controls>
-  <source src="./assets/images/SOON.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+[Watch the demo video](https://emerald-worldwide-canid-619.mypinata.cloud/ipfs/QmefyDqbWv3RR8GAnC9UfTh4nL6a75d9ZKqqXeLvPs1aY2?pinataGatewayToken=zlPzAkIwACH7RBln8paKhZqDELgPkLj6rcdum_Wc8DiBnRj7M5PP2OMN0sWGEr8x)
+
 
 ## Contributing
 
@@ -40,37 +38,28 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 Please make sure to update tests as appropriate.
 
-## License
-
-[MIT](https://choosealicense.com/licenses/mit/)
-
-````
-
-### 2. Create a new branch
+### 1. Create a new branch
 
 ```bash
 git checkout -b feature/AmazingFeature
 ````
 
-### 3. Commit your changes
+### 2. Commit your changes
 
 ```bash
 git commit -m 'Add some AmazingFeature'
 ```
 
-### 4. Push to the branch
+### 3. Push to the branch
 
 ```bash
 git push origin feature/AmazingFeature
 ```
 
-### 5. Open a Pull Request
+### 4. Open a Pull Request
 
 Go to the repository on GitHub and open a pull request.
 
-## License
-
-Distributed under the MIT License. See `LICENSE` for more information.
 
 ## Contact
 
